@@ -191,12 +191,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Step 6: Computing interval histogram data...");
     let histogram_bins = inversion::compute_histogram_data(&analyses, 5);
 
-    // Compute joint corridor (Algorithm 3.7) based on INTERNAL histogram bins (consistent with doc_ref visual thickness)
-    let bin_intervals: Vec<(f64, interval::Interval)> = histogram_bins
+    // Compute joint corridors (Algorithm 3.7)
+    // Corridor 1: INTERNAL histogram bins (Ji >= 0.5)
+    let bin_intervals_int: Vec<(f64, interval::Interval)> = histogram_bins
         .iter()
         .map(|b| (b.bt_ip_center, b.r_inv_interval))
         .collect();
-    let joint_corridor = regression::compute_joint_corridor(&bin_intervals);
+    let joint_corridor_int = regression::compute_joint_corridor(&bin_intervals_int);
+
+    // Corridor 2: EXTERNAL histogram bins (Ji > 0)
+    let bin_intervals_ext: Vec<(f64, interval::Interval)> = histogram_bins
+        .iter()
+        .map(|b| (b.bt_ip_center, b.r_inv_ext_interval))
+        .collect();
+    let joint_corridor_ext = regression::compute_joint_corridor(&bin_intervals_ext);
 
     println!("  Generated {} histogram bins", histogram_bins.len());
     for bin in histogram_bins.iter() {
@@ -218,7 +226,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         regression.as_ref(),
         &forecast,
         &histogram_bins,
-        Some(&joint_corridor),
+        Some(&joint_corridor_int),
+        Some(&joint_corridor_ext),
         &output_dir,
     )?;
     println!();

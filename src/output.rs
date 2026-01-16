@@ -16,7 +16,8 @@ pub fn export_results(
     regression: Option<&IntervalRegression>,
     forecast: &[ForecastPoint],
     histogram_bins: &[HistogramBin],
-    joint_corridor: Option<&JointCorridor>,
+    joint_corridor_int: Option<&JointCorridor>,
+    joint_corridor_ext: Option<&JointCorridor>,
     output_dir: &str,
 ) -> Result<(), Box<dyn Error>> {
     std::fs::create_dir_all(format!("{}/report/traces", output_dir))?;
@@ -27,9 +28,13 @@ pub fn export_results(
     export_regression_data(regression, forecast, output_dir)?;
     export_histogram_data(histogram_bins, output_dir)?;
 
-    if let Some(corridor) = joint_corridor {
-        export_joint_corridor(corridor, output_dir)?;
+    if let Some(corridor) = joint_corridor_int {
+        export_joint_corridor(corridor, "int", output_dir)?;
         export_informational_set(corridor, output_dir)?;
+    }
+
+    if let Some(corridor) = joint_corridor_ext {
+        export_joint_corridor(corridor, "ext", output_dir)?;
     }
 
     println!("\nExported results to:");
@@ -54,7 +59,11 @@ pub fn export_results(
         output_dir
     );
     println!(
-        "  {}/report/traces/joint_corridor_forecast.csv - Joint corridor (Alg 3.7)",
+        "  {}/report/traces/joint_corridor_forecast_int.csv - Joint corridor (Ji >= 0.5)",
+        output_dir
+    );
+    println!(
+        "  {}/report/traces/joint_corridor_forecast_ext.csv - Joint corridor (Ji > 0)",
         output_dir
     );
 
@@ -169,14 +178,22 @@ fn export_histogram_data(bins: &[HistogramBin], output_dir: &str) -> Result<(), 
     Ok(())
 }
 
-/// Exports the joint corridor forecast to joint_corridor_forecast.csv.
-fn export_joint_corridor(corridor: &JointCorridor, output_dir: &str) -> Result<(), Box<dyn Error>> {
+/// Exports the joint corridor forecast to joint_corridor_forecast_{suffix}.csv.
+fn export_joint_corridor(
+    corridor: &JointCorridor,
+    suffix: &str,
+    output_dir: &str,
+) -> Result<(), Box<dyn Error>> {
     let mut file = File::create(format!(
-        "{}/report/traces/joint_corridor_forecast.csv",
-        output_dir
+        "{}/report/traces/joint_corridor_forecast_{}.csv",
+        output_dir, suffix
     ))?;
 
-    writeln!(file, "# Joint Corridor Forecast Data (Algorithm 3.7)")?;
+    writeln!(
+        file,
+        "# Joint Corridor Forecast Data (Algorithm 3.7) - {}",
+        suffix
+    )?;
 
     // Export special lines in header
     if let Some((slope, intercept)) = corridor.mass_center_line() {

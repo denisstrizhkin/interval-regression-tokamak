@@ -77,52 +77,91 @@ def plot_fig_3_3():
 def plot_fig_3_4_3_5():
     """Figure 3.4 & 3.5: Compatibility Analysis"""
     try:
+        # Col 0: shot, 1: time_b, 2: time_a, 3: bt_ip, 4: r_point, 5: low, 6: high, 7: ext_low, 8: ext_high, 9: max_ji, 10: cons, 11: cons_ext
         data = pd.read_csv('report/traces/plot_data.csv', comment='#', header=None)
-        points = data[data[0].apply(lambda x: str(x).isdigit())].copy()
-        # Cols: shot, time_b, time_a, bt_ip, r_point, low, high, ext_low, ext_high, max_ji, is_cons, is_cons_ext
-        for col in [3, 4, 5, 6, 7, 8]: points[col] = pd.to_numeric(points[col])
+        points = data.copy()
+        for i in range(len(points.columns)):
+            points[i] = pd.to_numeric(points[i], errors='coerce')
+        points = points.dropna(subset=[3, 5, 6, 7, 8])
         
-        # Fit OLS regression matching doc_ref-20 style
-        z = np.polyfit(points[3], points[4], 1)
+        x = points[3] # bt_ip_ratio
+        
+        # --- Fig 3.4 (Internal) ---
+        y_low = points[5]
+        y_high = points[6]
+        y_mid = (y_low + y_high) / 2.0
+        
+        # Fit OLS through internal midpoints
+        z = np.polyfit(x, y_mid, 1)
         p = np.poly1d(z)
         xp = np.linspace(0.0016, 0.0042, 100)
         
-        # Fig 3.4 (Internal)
+        # Intersection logic: red if line passes through [low, high]
+        line_vals = p(x)
+        is_red = (y_low <= line_vals) & (line_vals <= y_high)
+        
         plt.figure(figsize=(10, 6))
-        plt.plot(xp, p(xp), color='gray', lw=1.5, alpha=0.8) # Regression line
-        consistent = points[points[10] == 1]
-        others = points[points[10] == 0]
-        plt.errorbar(consistent[3], consistent[4], yerr=[consistent[4]-consistent[5], consistent[6]-consistent[4]],
-                     fmt='none', ecolor='red', elinewidth=0.8, capsize=1.5)
-        plt.scatter(consistent[3], consistent[4], color='red', s=8, marker='o')
-        plt.errorbar(others[3], others[4], yerr=[others[4]-others[5], others[6]-others[4]],
+        plt.plot(xp, p(xp), color='black', lw=1.2, alpha=0.8, label='OLS Regression')
+        
+        # Plot inconsistent (blue)
+        blue_pts = points[~is_red]
+        blue_mid = (blue_pts[5] + blue_pts[6]) / 2.0
+        plt.errorbar(blue_pts[3], blue_mid, yerr=[blue_mid - blue_pts[5], blue_pts[6] - blue_mid],
                      fmt='none', ecolor='blue', elinewidth=0.8, capsize=1.5)
-        plt.scatter(others[3], others[4], color='blue', s=8, marker='o')
-        plt.title("R_inv, Bt/Ip, ji=0.5")
+        plt.scatter(blue_pts[3], blue_mid, color='blue', s=8, marker='o', label=r'Inconsistent ($J_I < 0.5$)')
+        
+        # Plot consistent (red)
+        red_pts = points[is_red]
+        red_mid = (red_pts[5] + red_pts[6]) / 2.0
+        plt.errorbar(red_pts[3], red_mid, yerr=[red_mid - red_pts[5], red_pts[6] - red_mid],
+                     fmt='none', ecolor='red', elinewidth=1.0, capsize=1.5)
+        plt.scatter(red_pts[3], red_mid, color='red', s=10, marker='o', zorder=5, label=r'Consistent ($J_I \geq 0.5$)')
+        
+        plt.title(r"R_inv, Bt/Ip, $J_I \geq 0.5$ (Internal Compatibility)")
         plt.xlabel("Bt/Ip")
         plt.ylabel("R_inv")
         plt.xlim(0.0016, 0.0042)
         plt.ylim(40, 60)
+        plt.legend(loc='upper right', frameon=True)
         plt.grid(True, linestyle=':', alpha=0.5)
         plt.savefig('report/images/fig_3_4_internal.png', dpi=300)
         plt.close()
 
-        # Fig 3.5 (External)
+        # --- Fig 3.5 (External) ---
+        y_ext_low = points[7]
+        y_ext_high = points[8]
+        y_ext_mid = (y_ext_low + y_ext_high) / 2.0
+        
+        # Fit OLS through external midpoints
+        ze = np.polyfit(x, y_ext_mid, 1)
+        pe = np.poly1d(ze)
+        
+        line_vals_ext = pe(x)
+        is_red_ext = (y_ext_low <= line_vals_ext) & (line_vals_ext <= y_ext_high)
+        
         plt.figure(figsize=(10, 6))
-        plt.plot(xp, p(xp), color='gray', lw=1.5, alpha=0.8) # Regression line
-        consistent_ext = points[points[11] == 1]
-        others_ext = points[points[11] == 0]
-        plt.errorbar(consistent_ext[3], consistent_ext[4], yerr=[consistent_ext[4]-consistent_ext[7], consistent_ext[8]-consistent_ext[4]],
-                     fmt='none', ecolor='red', elinewidth=0.8, capsize=1.5)
-        plt.scatter(consistent_ext[3], consistent_ext[4], color='red', s=8, marker='o')
-        plt.errorbar(others_ext[3], others_ext[4], yerr=[others_ext[4]-others_ext[7], others_ext[8]-others_ext[4]],
+        plt.plot(xp, pe(xp), color='black', lw=1.2, alpha=0.8, label='OLS Regression')
+        
+        # Plot inconsistent (blue)
+        blue_pts_ext = points[~is_red_ext]
+        blue_mid_ext = (blue_pts_ext[7] + blue_pts_ext[8]) / 2.0
+        plt.errorbar(blue_pts_ext[3], blue_mid_ext, yerr=[blue_mid_ext - blue_pts_ext[7], blue_pts_ext[8] - blue_mid_ext],
                      fmt='none', ecolor='blue', elinewidth=0.8, capsize=1.5)
-        plt.scatter(others_ext[3], others_ext[4], color='blue', s=8, marker='o')
-        plt.title("R_inv, Bt/Ip, ji>0")
+        plt.scatter(blue_pts_ext[3], blue_mid_ext, color='blue', s=8, marker='o', label=r'Inconsistent ($J_I = 0$)')
+        
+        # Plot consistent (red)
+        red_pts_ext = points[is_red_ext]
+        red_mid_ext = (red_pts_ext[7] + red_pts_ext[8]) / 2.0
+        plt.errorbar(red_pts_ext[3], red_mid_ext, yerr=[red_mid_ext - red_pts_ext[7], red_pts_ext[8] - red_mid_ext],
+                     fmt='none', ecolor='red', elinewidth=1.0, capsize=1.5)
+        plt.scatter(red_pts_ext[3], red_mid_ext, color='red', s=10, marker='o', zorder=5, label=r'Consistent ($J_I > 0$)')
+        
+        plt.title("R_inv, Bt/Ip, ji>0 (External Compatibility)")
         plt.xlabel("Bt/Ip")
         plt.ylabel("R_inv")
         plt.xlim(0.0016, 0.0042)
         plt.ylim(40, 60)
+        plt.legend(loc='upper right', frameon=True)
         plt.grid(True, linestyle=':', alpha=0.5)
         plt.savefig('report/images/fig_3_5_external.png', dpi=300)
         plt.close()
@@ -130,62 +169,71 @@ def plot_fig_3_4_3_5():
         print(f"Error Fig 3.4/3.5: {e}")
 
 def plot_fig_3_6():
-    """Figure 3.9 style: Joint Corridor with multiple regression choices"""
+    """Figure 3.9 style: Joint Corridor with multiple corridors and individual points"""
     try:
-        hist = pd.read_csv('report/traces/histogram_data.csv', comment='#', header=None,
-                          names=['bt_ip', 'mean', 'low', 'high', 'ext_low', 'ext_high', 'count'])
+        # Load internal corridor
+        corridor_int = pd.read_csv('report/traces/joint_corridor_forecast_int.csv', comment='#', header=None)
+        # Load external corridor
+        corridor_ext = pd.read_csv('report/traces/joint_corridor_forecast_ext.csv', comment='#', header=None)
         
-        mass_slope, mass_int = 0, 0
-        diag_slope, diag_int = 0, 0
-        
-        with open('report/traces/joint_corridor_forecast.csv', 'r') as f:
-            lines = f.readlines()
-            for line in lines:
-                if "Mass Center Line" in line:
-                    parts = line.split(',')
-                    mass_slope = float(parts[0].split('=')[1])
-                    mass_int = float(parts[1].split('=')[1])
-                elif "Diagonal Center Line" in line:
-                    parts = line.split(',')
-                    diag_slope = float(parts[0].split('=')[1])
-                    diag_int = float(parts[1].split('=')[1])
+        # Load raw points
+        data = pd.read_csv('report/traces/plot_data.csv', comment='#', header=None)
+        # Col 0: shot, 1: time_b, 2: time_a, 3: bt_ip, 4: r_point, 5: low, 6: high, 7: ext_low, 8: ext_high
+        points = data.copy()
+        for i in range(len(points.columns)):
+            points[i] = pd.to_numeric(points[i], errors='coerce')
+        points = points.dropna(subset=[3, 5, 6, 7, 8])
 
-        corridor_data = [[float(p) for p in l.split(',')] for l in lines if l and l[0].isdigit()]
-        corridor = pd.DataFrame(corridor_data)
-        
         plt.figure(figsize=(10, 6))
         
-        # 1. Admissible Region (blue corridor)
-        plt.fill_between(corridor[0], corridor[2], corridor[3], color='#a29bfe', alpha=0.6, label='corridor')
+        # 1. External Admissible Region (broad blue corridor)
+        plt.fill_between(corridor_ext[0], corridor_ext[2], corridor_ext[3], color='#a29bfe', alpha=0.3, label='corridor (Ji > 0)')
         
-        # 2. Experimental data points (Blue circles with error bars, as per doc_ref)
-        # Using ext_low/ext_high for blue dots to show the broad uncertainty
-        plt.errorbar(hist['bt_ip'], hist['mean'], yerr=[hist['mean']-hist['ext_low'], hist['ext_high']-hist['mean']],
-                     fmt='none', ecolor='blue', elinewidth=0.8, capsize=2, alpha=0.6)
-        plt.scatter(hist['bt_ip'], hist['mean'], color='blue', s=8, label='R_inv', marker='o')
+        # 2. Internal Admissible Region (tighter blue corridor)
+        plt.fill_between(corridor_int[0], corridor_int[2], corridor_int[3], color='#a29bfe', alpha=0.6, label='corridor (Ji >= 0.5)')
+        
+        # 3. Experimental data points (Blue markers with error bars)
+        # We use the internal error bars [low, high] for the main points to show the core uncertainty
+        plt.errorbar(points[3], (points[5]+points[6])/2.0, yerr=[(points[5]+points[6])/2.0 - points[5], points[6] - (points[5]+points[6])/2.0],
+                     fmt='none', ecolor='blue', elinewidth=0.6, capsize=1.5, alpha=0.7)
+        plt.scatter(points[3], (points[5]+points[6])/2.0, color='blue', s=6, label='R_inv', marker='o', alpha=0.9)
 
-        # 3. Forecast lines
-        x_full = np.linspace(0.0016, 0.010, 200)
-        plt.plot(x_full, mass_slope * x_full + mass_int, color='black', lw=1.5, label='mass center regression')
-        plt.plot(x_full, diag_slope * x_full + diag_int, color='#27ae60', lw=1.2, label='diagonal center regression')
+        # 4. Forecast markers at specific points (matching reference style)
+        forecast_x = [0.005, 0.008, 0.010]
+        
+        # Prediction Ji > 0 (Red markers)
+        for x in forecast_x:
+            # Interpolate from corridor_ext
+            row = corridor_ext.iloc[(corridor_ext[0] - x).abs().argmin()]
+            plt.errorbar([row[0]], [row[1]], yerr=[[row[1]-row[2]], [row[3]-row[1]]], fmt='none', ecolor='red', elinewidth=1.0, capsize=3)
+            if x == forecast_x[0]:
+                plt.scatter([row[0]], [row[1]], color='red', s=12, marker='o', label=r'prediction ji>0')
+            else:
+                plt.scatter([row[0]], [row[1]], color='red', s=12, marker='o')
 
-        # 4. Prediction points (Red markers at the end of the range)
-        forecast_pts = corridor[corridor[0] > 0.0035].iloc[::40] # Sparse points for visibility
-        plt.errorbar(forecast_pts[0], forecast_pts[1], yerr=[forecast_pts[1]-forecast_pts[2], forecast_pts[3]-forecast_pts[1]],
-                     fmt='none', ecolor='red', elinewidth=0.8, capsize=2)
-        plt.scatter(forecast_pts[0], forecast_pts[1], color='red', s=10, marker='x', label='prediction ji>0')
+        # Prediction Ji >= 0.5 (Black markers/bars)
+        for x in forecast_x:
+            # Interpolate from corridor_int
+            row = corridor_int.iloc[(corridor_int[0] - x).abs().argmin()]
+            plt.errorbar([row[0]], [row[1]], yerr=[[row[1]-row[2]], [row[3]-row[1]]], fmt='none', ecolor='black', elinewidth=1.5, capsize=3)
+            if x == forecast_x[0]:
+                plt.scatter([row[0]], [row[1]], color='black', s=15, marker='_', label=r'Prediction Ji $\geq$ 0.5')
+            else:
+                plt.scatter([row[0]], [row[1]], color='black', s=15, marker='_')
 
         plt.title("R_inv, Bt/Ip, ji>0")
         plt.xlabel("Bt/Ip")
         plt.ylabel("R_inv")
         plt.xlim(0.0015, 0.0105)
-        plt.ylim(40, 60)
-        plt.legend(frameon=True, loc='upper right')
+        plt.ylim(40.8, 60.0) # Match reference scale
+        plt.legend(frameon=True, loc='upper right', fontsize=8)
         plt.grid(True, linestyle=':', alpha=0.5)
         plt.savefig('report/images/fig_3_6_corridor.png', dpi=300)
         plt.close()
     except Exception as e:
-        print(f"Error Fig 3.6/3.9: {e}")
+        import traceback
+        traceback.print_exc()
+        print(f"Error Fig 3.6: {e}")
 
 def plot_fig_3_7_informational_set():
     """Figure 3.8 style: Informational Set in parameter space (a, b)"""
