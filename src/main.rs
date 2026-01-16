@@ -89,7 +89,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Step 3: Analyze all sawtooth events
     println!("Step 3: Analyzing sawtooth events...");
-    let analyses = inversion::analyze_all_events(&data, &config);
+    let mut analyses = inversion::analyze_all_events(&data, &config);
 
     println!("  Successfully analyzed {} sawtooth events", analyses.len());
 
@@ -131,6 +131,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             reg.intercept_interval.lower, reg.intercept_interval.upper
         );
         println!("  R-squared: {:.4}", reg.r_squared);
+
+        // Update consistency status based on regression line
+        // A point is consistent if the regression line passes through its error bars [low, high]
+        for a in &mut analyses {
+            let r_reg = reg.predict(a.bt_ip_ratio);
+            a.is_consistent = r_reg >= a.r_inv_low && r_reg <= a.r_inv_high;
+        }
     } else {
         println!("  Warning: Regression could not be computed");
     }
@@ -182,15 +189,23 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Step 6: Compute interval histogram data
     println!("Step 6: Computing interval histogram data...");
-    let histogram_bins = inversion::compute_histogram_data(&analyses, 10);
+    let histogram_bins = inversion::compute_histogram_data(&analyses, 5);
+
+    // Compute joint corridor (Algorithm 3.7) based on INTERNAL histogram bins (consistent with doc_ref visual thickness)
+    let bin_intervals: Vec<(f64, interval::Interval)> = histogram_bins
+        .iter()
+        .map(|b| (b.bt_ip_center, b.r_inv_interval))
+        .collect();
+    let joint_corridor = regression::compute_joint_corridor(&bin_intervals);
 
     println!("  Generated {} histogram bins", histogram_bins.len());
-    for bin in histogram_bins.iter().take(5) {
+    for bin in histogram_bins.iter() {
         println!(
-            "    B_T/I_P = {:.5}: R_inv = {:.2} ± {:.2} cm (n={})",
+            "    B_T/I_P = {:.5}: R_inv_int = {:.2} ± {:.2}, R_inv_ext = ± {:.2} cm (n={})",
             bin.bt_ip_center,
             bin.r_inv_mean,
             bin.r_inv_interval.radius(),
+            bin.r_inv_ext_interval.radius(),
             bin.count
         );
     }
@@ -198,21 +213,28 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Step 7: Export results
     println!("Step 7: Exporting results...");
-    output::export_results(&analyses, regression.as_ref(), &forecast, &output_dir)?;
-    output::generate_gnuplot_script(&output_dir)?;
+    output::export_results(
+        &analyses,
+        regression.as_ref(),
+        &forecast,
+        &histogram_bins,
+        Some(&joint_corridor),
+        &output_dir,
+    )?;
+    output::generate_python_script(&output_dir)?;
     println!();
 
     // Final summary
     println!("╔════════════════════════════════════════════════════════════════════╗");
     println!("║  Analysis Complete                                                 ║");
     println!("╠════════════════════════════════════════════════════════════════════╣");
-    println!("║  Run 'gnuplot plot_results.gp' to generate visualization plots    ║");
+    println!("║  Run 'uv run py/plot_results.py' to generate visualization plots ║");
     println!("║  Output files:                                                     ║");
     println!("║    - report/traces/plot_data.csv       (main analysis results)      ║");
     println!("║    - report/traces/jaccard_curves.csv  (Jaccard distributions)     ║");
     println!("║    - report/traces/profiles.csv        (temperature profiles)      ║");
     println!("║    - report/traces/regression_data.csv (regression forecasts)    ║");
-    println!("║    - plot_results.gp                  (gnuplot script)             ║");
+    println!("║    - py/plot_results.py               (python plotting script)     ║");
     println!("╚════════════════════════════════════════════════════════════════════╝");
 
     Ok(())

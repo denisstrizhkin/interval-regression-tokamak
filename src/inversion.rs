@@ -18,11 +18,16 @@ pub struct InversionAnalysis {
     pub time_after: f64,
     /// Point estimate of inversion radius (where J_I is maximized)
     pub r_inv_point: f64,
-    /// Interval bounds where J_I >= 0.5 [lower, upper]
+    /// Internal interval bounds where J_I >= 0.5 [lower, upper]
     pub r_inv_low: f64,
     pub r_inv_high: f64,
+    /// External interval bounds where J_I > 0 [lower, upper]
+    pub r_inv_ext_low: f64,
+    pub r_inv_ext_high: f64,
     /// Consistency flag for the maximal intersection subset (Figure 3.4)
     pub is_consistent: bool,
+    /// Consistency flag for external estimates (Figure 3.5)
+    pub is_consistent_ext: bool,
     /// Reference value from literature
     pub r_inv_reference: f64,
     /// Jaccard index values at detailed grid points
@@ -175,10 +180,17 @@ pub fn analyze_sawtooth_event(
         })
         .cloned()?;
 
-    // Find bounds where J_I >= threshold within the outer region
+    // Find bounds where J_I >= threshold within the outer region (Internal)
     let inner_points: Vec<f64> = jaccard_curve
         .iter()
         .filter(|(r, ji)| *r > 42.0 && *ji >= config.ji_inner_threshold)
+        .map(|(r, _)| *r)
+        .collect();
+
+    // Find bounds where J_I > 0 within the outer region (External)
+    let outer_points: Vec<f64> = jaccard_curve
+        .iter()
+        .filter(|(r, ji)| *r > 42.0 && *ji > 0.0)
         .map(|(r, _)| *r)
         .collect();
 
@@ -192,6 +204,20 @@ pub fn analyze_sawtooth_event(
             .fold(f64::NEG_INFINITY, f64::max);
         (low, high)
     };
+
+    let (r_inv_ext_low, r_inv_ext_high) = if outer_points.is_empty() {
+        (r_inv_low, r_inv_high)
+    } else {
+        let low = outer_points.iter().cloned().fold(f64::INFINITY, f64::min);
+        let high = outer_points
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
+        (low, high)
+    };
+
+    // Point estimate is the midpoint for vertical centering on error bars
+    let r_inv_point = (r_inv_low + r_inv_high) / 2.0;
 
     // Store profiles
     let profile_before_pts: Vec<(f64, f64)> = points_before
@@ -214,7 +240,10 @@ pub fn analyze_sawtooth_event(
         r_inv_point,
         r_inv_low,
         r_inv_high,
-        is_consistent: false, // Will be set during batch analysis
+        r_inv_ext_low,
+        r_inv_ext_high,
+        is_consistent: false,
+        is_consistent_ext: false,
         r_inv_reference: event.r_inv_reference,
         jaccard_curve,
         bt_ip_ratio,
@@ -318,11 +347,42 @@ pub fn analyze_all_events(
         }
     }
 
-    // Label analyses that are part of the maximal intersection
-    // Compatibility means the interval contains the common intersection range
+    // Repeat for external estimates
+    let mut events_ext: Vec<(f64, i32)> = Vec::new();
+    for a in &analyses {
+        events_ext.push((a.r_inv_ext_low, 1));
+        events_ext.push((a.r_inv_ext_high, -1));
+    }
+    events_ext.sort_by(|a, b| {
+        let res = a.0.partial_cmp(&b.0).unwrap();
+        if res == std::cmp::Ordering::Equal {
+            b.1.cmp(&a.1)
+        } else {
+            res
+        }
+    });
+
+    let mut max_count_ext = 0;
+    let mut current_count_ext = 0;
+    let mut r0_range_ext = (0.0, 0.0);
+
+    for (r, type_flag) in &events_ext {
+        current_count_ext += type_flag;
+        if current_count_ext > max_count_ext {
+            max_count_ext = current_count_ext;
+            r0_range_ext.0 = *r;
+        } else if current_count_ext == max_count_ext && type_flag == &-1 {
+            r0_range_ext.1 = *r;
+        }
+    }
+
+    // Label consistency
     for a in &mut analyses {
         if a.r_inv_low <= r0_range.0 && a.r_inv_high >= r0_range.0 {
             a.is_consistent = true;
+        }
+        if a.r_inv_ext_low <= r0_range_ext.0 && a.r_inv_ext_high >= r0_range_ext.0 {
+            a.is_consistent_ext = true;
         }
     }
 
@@ -373,10 +433,23 @@ pub fn compute_histogram_data(
             let min = values.iter().cloned().fold(f64::INFINITY, f64::min);
             let max = values.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
 
+            // Also compute external interval for the bin
+            let ext_low = analyses
+                .iter()
+                .filter(|a| a.bt_ip_ratio >= bin_start && a.bt_ip_ratio < bin_end)
+                .map(|a| a.r_inv_ext_low)
+                .fold(f64::INFINITY, f64::min);
+            let ext_high = analyses
+                .iter()
+                .filter(|a| a.bt_ip_ratio >= bin_start && a.bt_ip_ratio < bin_end)
+                .map(|a| a.r_inv_ext_high)
+                .fold(f64::NEG_INFINITY, f64::max);
+
             bins.push(HistogramBin {
                 bt_ip_center: bin_center,
                 r_inv_mean: mean,
                 r_inv_interval: Interval::new(min, max),
+                r_inv_ext_interval: Interval::new(ext_low, ext_high),
                 count: values.len(),
             });
         }
@@ -391,5 +464,6 @@ pub struct HistogramBin {
     pub bt_ip_center: f64,
     pub r_inv_mean: f64,
     pub r_inv_interval: Interval,
+    pub r_inv_ext_interval: Interval,
     pub count: usize,
 }

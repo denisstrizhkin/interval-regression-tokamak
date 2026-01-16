@@ -1,0 +1,119 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian,english]{babel}
+\usepackage[T2A]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{left=3cm,right=1.5cm,top=2cm,bottom=2cm}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{indentfirst}
+\usepackage{titlesec}
+
+% Section styling to match GOST/SPbPU 
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+\begin{document}
+
+% --- TITLE PAGE ---
+\begin{titlepage}
+    \centering
+    Санкт-Петербургский Политехнический Университет Петра Великого\\
+    Физико-Механический институт\\
+    Высшая школа прикладной математики и вычислительной физики\\
+    \vfill
+    \textbf{Отчёт по лабораторной работе по дисциплине}\\
+    \textbf{«Интервальный анализ»}\\
+    \vfill
+    \begin{flushright}
+        Выполнил:\\
+        студент гр. 5040102/40201\\
+        \textbf{Стрижкин Д.А.}\\
+        \vspace{1cm}
+        Проверил:\\
+        доцент\\
+        \textbf{Баженов А.Н.}
+    \end{flushright}
+    \vfill
+    Санкт-Петербург --- 2025
+\end{titlepage}
+
+\newpage
+\section{Введение}
+Радиус инверсии $R_{inv}$ является критическим параметром при анализе МГД-активности в плазме токамака Глобус-М2. Традиционные методы точечных оценок часто не учитывают погрешности измерений профилей температуры. В данной работе предлагается подход, основанный на интервальной регрессии и использовании индекса Жаккара.
+
+\section{Теоретические основы интервальной статистики}
+\subsection{Индекс Жаккара для профилей}
+Для количественной оценки уровня доверия используется индекс Жаккара $J_I$:
+\begin{equation}
+    J_I(r) = \frac{wid(Te^{before}(r) \wedge Te^{after}(r))}{wid(Te^{before}(r) \vee Te^{after}(r))}
+\end{equation}
+где $\wedge$ и $\vee$ обозначают пересечение и объединение интервалов соответственно.
+
+На основе анализа графика индекса Жаккара вводим две оценки:
+\begin{enumerate}
+    \item Внешняя оценка: $R_{ext} = r \mid J_i(r) > 0$.
+    \item Внутренняя оценка: $R_{int} = r \mid J_i(r) > 0.5$.
+\end{enumerate}
+
+\section{Анализ данных токамака «Глобус-М2»}
+На рис. \ref{fig:profiles} представлены типичные профили температуры до и после сброса пилообразного колебания с соответствующими коридорами неопределённости.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/fig_3_2_profiles.png}
+    \caption{График температуры электронов от радиуса с коридорами.}
+    \label{fig:profiles}
+\end{figure}
+
+Распределение индекса Жаккара для данного события показано на рис. \ref{fig:jaccard}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/fig_3_3_jaccard.png}
+    \caption{Индекс Жаккара для пересекающихся коридоров.}
+    \label{fig:jaccard}
+\end{figure}
+
+\section{Результаты и их интерпретация}
+\subsection{Анализ полученных интервальных оценок}
+Для каждого экспериментального значения параметра $B_T/I_P$ определен соответствующий интервал $R_{inv} \in [R_{min}, R_{max}]$.
+На рис. \ref{fig:internal} и \ref{fig:external} представлены внутренние и внешние интервальные оценки соответственно.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/fig_3_4_internal.png}
+    \caption{Внутренние интервальные оценки инверсий ($\text{J}_I \ge 0.5$).}
+    \label{fig:internal}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/fig_3_5_external.png}
+    \caption{Внешние интервальные оценки инверсий ($\text{J}_I > 0$).}
+    \label{fig:external}
+\end{figure}
+
+\subsection{Построение коридора совместных зависимостей}
+Для построения итогового прогноза используется Алгоритм 3.7.
+\begin{enumerate}
+    \item[A.] \textbf{Генерация кандидатных прямых:} Для каждой пары интервалов строятся 4 прямые, проходящие через их границы.
+    \item[B.] \textbf{Проверка пересечения:} Прямая считается допустимой, если она попадает во все интервалы обучающей выборки.
+    \item[C.] \textbf{Формирование коридора:} Границы определяются как огибающие всех допустимых прямых.
+\end{enumerate}
+
+Итоговый коридор для внешних оценок представлен на рис. \ref{fig:corridor}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/fig_3_6_corridor.png}
+    \caption{Коридор совместных зависимостей для внешних оценок. Синяя область --- область допустимых решений.}
+    \label{fig:corridor}
+\end{figure}
+
+\section{Выводы}
+Разработанный программный комплекс на языке Rust позволяет проводить автоматизированный интервальный анализ данных токамака Глобус-М2. Метод построения коридора совместных зависимостей (Алгоритм 3.7) обеспечивает высокую надежность прогнозирования радиуса инверсии в новых режимах работы установки.
+
+\end{document}

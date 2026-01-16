@@ -4,17 +4,19 @@
 //! with gnuplot, including Jaccard curves, inversion radius estimates,
 //! and regression forecasts.
 
-use crate::inversion::InversionAnalysis;
-use crate::regression::{ForecastPoint, IntervalRegression};
+use crate::inversion::{HistogramBin, InversionAnalysis};
+use crate::regression::{ForecastPoint, IntervalRegression, JointCorridor};
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 
-/// Exports all analysis results to CSV files for gnuplot visualization.
+/// Exports all analysis results to CSV files for visualization.
 pub fn export_results(
     analyses: &[InversionAnalysis],
     regression: Option<&IntervalRegression>,
     forecast: &[ForecastPoint],
+    histogram_bins: &[HistogramBin],
+    joint_corridor: Option<&JointCorridor>,
     output_dir: &str,
 ) -> Result<(), Box<dyn Error>> {
     std::fs::create_dir_all(format!("{}/report/traces", output_dir))?;
@@ -23,6 +25,11 @@ pub fn export_results(
     export_jaccard_curves(analyses, output_dir)?;
     export_profiles(analyses, output_dir)?;
     export_regression_data(regression, forecast, output_dir)?;
+    export_histogram_data(histogram_bins, output_dir)?;
+
+    if let Some(corridor) = joint_corridor {
+        export_joint_corridor(corridor, output_dir)?;
+    }
 
     println!("\nExported results to:");
     println!(
@@ -41,6 +48,14 @@ pub fn export_results(
         "  {}/report/traces/regression_data.csv - Regression and forecast data",
         output_dir
     );
+    println!(
+        "  {}/report/traces/histogram_data.csv - Binned histogram data",
+        output_dir
+    );
+    println!(
+        "  {}/report/traces/joint_corridor_forecast.csv - Joint corridor (Alg 3.7)",
+        output_dir
+    );
 
     Ok(())
 }
@@ -54,7 +69,6 @@ fn export_main_data(
 ) -> Result<(), Box<dyn Error>> {
     let mut file = File::create(format!("{}/report/traces/plot_data.csv", output_dir))?;
 
-    // Header
     writeln!(
         file,
         "# Globus-M2 Tokamak Inversion Radius Analysis Results"
@@ -64,7 +78,7 @@ fn export_main_data(
 
     // Section 1: Inversion radius estimates
     writeln!(file, "# Section 1: Inversion Radius Estimates")?;
-    writeln!(file, "# shot_number,time_before,time_after,bt_ip_ratio,r_inv_point,r_inv_low,r_inv_high,r_inv_reference,max_jaccard,is_consistent")?;
+    writeln!(file, "# shot_number,time_before,time_after,bt_ip_ratio,r_inv_point,r_inv_low,r_inv_high,r_inv_ext_low,r_inv_ext_high,max_jaccard_index,is_consistent,is_consistent_ext")?;
 
     for a in analyses {
         let max_ji = a
@@ -75,7 +89,7 @@ fn export_main_data(
 
         writeln!(
             file,
-            "{},{:.2},{:.2},{:.6},{:.3},{:.3},{:.3},{:.3},{:.6},{}",
+            "{},{:.2},{:.2},{:.6},{:.3},{:.3},{:.3},{:.3},{:.3},{:.6},{},{}",
             a.shot_number,
             a.time_before,
             a.time_after,
@@ -83,9 +97,11 @@ fn export_main_data(
             a.r_inv_point,
             a.r_inv_low,
             a.r_inv_high,
-            a.r_inv_reference / 10.0,
+            a.r_inv_ext_low,
+            a.r_inv_ext_high,
             max_ji,
-            if a.is_consistent { 1 } else { 0 }
+            if a.is_consistent { 1 } else { 0 },
+            if a.is_consistent_ext { 1 } else { 0 }
         )?;
     }
 
@@ -125,6 +141,58 @@ fn export_main_data(
     Ok(())
 }
 
+/// Exports histogram bin data to histogram_data.csv.
+fn export_histogram_data(bins: &[HistogramBin], output_dir: &str) -> Result<(), Box<dyn Error>> {
+    let mut file = File::create(format!("{}/report/traces/histogram_data.csv", output_dir))?;
+
+    writeln!(file, "# Binned Inversion Radius Histogram Data")?;
+    writeln!(
+        file,
+        "# bt_ip_center,r_inv_mean,r_inv_low,r_inv_high,r_inv_ext_low,r_inv_ext_high,count"
+    )?;
+
+    for bin in bins {
+        writeln!(
+            file,
+            "{:.6},{:.3},{:.3},{:.3},{:.3},{:.3},{}",
+            bin.bt_ip_center,
+            bin.r_inv_mean,
+            bin.r_inv_interval.lower,
+            bin.r_inv_interval.upper,
+            bin.r_inv_ext_interval.lower,
+            bin.r_inv_ext_interval.upper,
+            bin.count
+        )?;
+    }
+
+    Ok(())
+}
+
+/// Exports the joint corridor forecast to joint_corridor_forecast.csv.
+fn export_joint_corridor(corridor: &JointCorridor, output_dir: &str) -> Result<(), Box<dyn Error>> {
+    let mut file = File::create(format!(
+        "{}/report/traces/joint_corridor_forecast.csv",
+        output_dir
+    ))?;
+
+    writeln!(file, "# Joint Corridor Forecast Data (Algorithm 3.7)")?;
+    writeln!(file, "# bt_ip,r_inv_center,r_inv_lower,r_inv_upper")?;
+
+    let x_min = 0.0016;
+    let x_max = 0.0042;
+    let forecast = corridor.forecast(x_min, x_max, 100);
+
+    for fp in forecast {
+        writeln!(
+            file,
+            "{:.6},{:.3},{:.3},{:.3}",
+            fp.bt_ip, fp.r_inv_point, fp.r_inv_lower, fp.r_inv_upper
+        )?;
+    }
+
+    Ok(())
+}
+
 /// Exports Jaccard curves for each analysis.
 fn export_jaccard_curves(
     analyses: &[InversionAnalysis],
@@ -159,7 +227,6 @@ fn export_profiles(analyses: &[InversionAnalysis], output_dir: &str) -> Result<(
     )?;
 
     for a in analyses {
-        // Profile before
         for (r, t) in &a.profile_before {
             writeln!(
                 file,
@@ -167,8 +234,6 @@ fn export_profiles(analyses: &[InversionAnalysis], output_dir: &str) -> Result<(
                 a.shot_number, a.time_before, r, t
             )?;
         }
-
-        // Profile after
         for (r, t) in &a.profile_after {
             writeln!(
                 file,
@@ -176,8 +241,6 @@ fn export_profiles(analyses: &[InversionAnalysis], output_dir: &str) -> Result<(
                 a.shot_number, a.time_after, r, t
             )?;
         }
-
-        // Corridor before
         for (r, lower, upper) in &a.corridor_before {
             writeln!(
                 file,
@@ -185,8 +248,6 @@ fn export_profiles(analyses: &[InversionAnalysis], output_dir: &str) -> Result<(
                 a.shot_number, a.time_before, r, lower, upper
             )?;
         }
-
-        // Corridor after
         for (r, lower, upper) in &a.corridor_after {
             writeln!(
                 file,
@@ -242,131 +303,177 @@ fn export_regression_data(
     Ok(())
 }
 
-/// Generates a gnuplot script for visualization.
-pub fn generate_gnuplot_script(output_dir: &str) -> Result<(), Box<dyn Error>> {
-    let script_path = format!("{}/plot_results.gp", output_dir);
+/// Generates a Python script for visualization matching the reference.pdf style.
+pub fn generate_python_script(output_dir: &str) -> Result<(), Box<dyn Error>> {
+    let script_path = format!("{}/py/plot_results.py", output_dir);
     let mut file = File::create(&script_path)?;
 
-    let script = r##"#!/usr/bin/gnuplot
-# Gnuplot script for Globus-M2 Tokamak Inversion Radius Analysis
-# Generated by interval-regression-tokamak
-# Run with: gnuplot plot_results.gp
+    let script = r##"import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+from matplotlib.lines import Line2D
 
-# Set up terminal for high-quality output
-set terminal pngcairo enhanced font 'Arial,12' size 1600,1200
-set output 'report/images/analysis_results.png'
-
-# Set CSV separator and comment character
-set datafile separator ","
-set datafile commentschars "#"
+# Create images directory if it doesn't exist
+os.makedirs('report/images', exist_ok=True)
 
 # Common styling
-set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 7 ps 1.2
-set style line 2 lc rgb '#dd181f' lt 1 lw 2 pt 5 ps 1.2
-set style line 3 lc rgb '#00aa00' lt 1 lw 2 pt 9 ps 1.2
-set style line 4 lc rgb '#000000' lt 2 lw 1.5
-set style line 5 lc rgb '#ff8c00' lt 1 lw 1.5
-set style fill transparent solid 0.3 noborder
+plt.style.use('seaborn-v0_8-whitegrid')
+plt.rcParams.update({'font.size': 10, 'font.family': 'sans-serif'})
 
-# Multi-panel figure
-set multiplot layout 2,2 title "Globus-M2 Tokamak Inversion Radius Analysis" font ',16'
+def plot_fig_3_2():
+    """Figure 3.2: Temperature profiles with corridors"""
+    try:
+        profiles = pd.read_csv('report/traces/profiles.csv', comment='#', header=None,
+                              names=['type', 'shot', 'time', 'radius', 'temp', 'low', 'high'])
+        # Reference uses shot 42154
+        shot_id = 42154 if 42154 in profiles['shot'].values else profiles['shot'].iloc[0]
+        p_before = profiles[(profiles['type'] == 'before') & (profiles['shot'] == shot_id)]
+        p_after = profiles[(profiles['type'] == 'after') & (profiles['shot'] == shot_id)]
+        c_before = profiles[(profiles['type'] == 'corridor_before') & (profiles['shot'] == shot_id)]
+        c_after = profiles[(profiles['type'] == 'corridor_after') & (profiles['shot'] == shot_id)]
+        
+        plt.figure(figsize=(10, 6))
+        # Use high quality markers and transparency to match doc_ref-18
+        if not c_before.empty:
+            plt.fill_between(c_before['radius'], c_before['low'], c_before['high'], color='#2ecc71', alpha=0.3)
+            plt.plot(c_before['radius'], (c_before['low']+c_before['high'])/2, 'g^-', label=f'value_t1_{shot_id}', markersize=3, lw=0.8)
+        if not c_after.empty:
+            plt.fill_between(c_after['radius'], c_after['low'], c_after['high'], color='#3498db', alpha=0.3)
+            plt.plot(c_after['radius'], (c_after['low']+c_after['high'])/2, 'bs--', label=f'value_t2_{shot_id}', markersize=3, lw=0.8)
+            
+        plt.title(f"Te, R shot {shot_id}")
+        plt.xlabel("R")
+        plt.ylabel("Te")
+        plt.xlim(40, 60)
+        plt.ylim(0.2, 2.7)
+        plt.legend()
+        plt.grid(True, linestyle=':', alpha=0.5)
+        plt.savefig('report/images/fig_3_2_profiles.png', dpi=300)
+        plt.close()
+    except Exception as e:
+        print(f"Error Fig 3.2: {e}")
 
-# Top-left: Example temperature profiles (shot 42145)
-set title "Temperature Profile Before/After Sawtooth" font ',14'
-set xlabel "Radius R (cm)"
-set ylabel "Normalized T_e/<Te>"
-set key top right
-set grid
-set autoscale
+def plot_fig_3_3():
+    """Figure 3.3: Jaccard Index"""
+    try:
+        jaccard = pd.read_csv('report/traces/jaccard_curves.csv', comment='#', header=None,
+                             names=['shot', 'time', 'radius', 'ji'])
+        shot_id = 42154 if 42154 in jaccard['shot'].values else jaccard['shot'].iloc[0]
+        subset = jaccard[jaccard['shot'] == shot_id]
+        
+        plt.figure(figsize=(10, 6))
+        plt.plot(subset['radius'], subset['ji'], color='#3498db', lw=1.5, label='Ji')
+        
+        # In doc_ref-19, threshold lines are segments. 
+        # For Ji=0.5, only show where Ji is high
+        peak_range = subset[subset['ji'] > 0.3]['radius']
+        if not peak_range.empty:
+            plt.hlines(0.5, peak_range.min(), peak_range.max(), color='black', lw=1.2, label='Внутренний Ji=0.5')
+        plt.axhline(0, color='red', lw=1, label='Внешний Ji>0')
+        
+        plt.title("Индекс Жаккара")
+        plt.xlabel("R")
+        plt.ylabel("Ji")
+        plt.xlim(40, 60)
+        plt.ylim(-0.05, 1.1)
+        plt.legend(loc='upper right', frameon=True)
+        plt.grid(True, linestyle=':', alpha=0.5)
+        plt.savefig('report/images/fig_3_3_jaccard.png', dpi=300)
+        plt.close()
+    except Exception as e:
+        print(f"Error Fig 3.3: {e}")
 
-plot '< grep "^before,42145,194" report/traces/profiles.csv' using 4:5 with linespoints ls 1 title 'Before (t=194.5 ms)', \
-     '< grep "^after,42145,197" report/traces/profiles.csv' using 4:5 with linespoints ls 2 title 'After (t=197.6 ms)'
+def plot_fig_3_4_3_5():
+    """Figure 3.4 & 3.5: Compatibility Analysis"""
+    try:
+        data = pd.read_csv('report/traces/plot_data.csv', comment='#', header=None)
+        points = data[data[0].apply(lambda x: str(x).isdigit())].copy()
+        # Cols: shot, time_b, time_a, bt_ip, r_point, low, high, ext_low, ext_high, max_ji, is_cons, is_cons_ext
+        for col in [3, 4, 5, 6, 7, 8]: points[col] = pd.to_numeric(points[col])
+        
+        # Fit OLS regression matching doc_ref-20 style
+        z = np.polyfit(points[3], points[4], 1)
+        p = np.poly1d(z)
+        xp = np.linspace(0.0016, 0.0042, 100)
+        
+        # Fig 3.4 (Internal)
+        plt.figure(figsize=(10, 6))
+        plt.plot(xp, p(xp), color='gray', lw=1.5, alpha=0.8) # Regression line
+        consistent = points[points[10] == 1]
+        others = points[points[10] == 0]
+        plt.errorbar(consistent[3], consistent[4], yerr=[consistent[4]-consistent[5], consistent[6]-consistent[4]],
+                     fmt='none', ecolor='red', elinewidth=0.8, capsize=1.5)
+        plt.scatter(consistent[3], consistent[4], color='red', s=8, marker='o')
+        plt.errorbar(others[3], others[4], yerr=[others[4]-others[5], others[6]-others[4]],
+                     fmt='none', ecolor='blue', elinewidth=0.8, capsize=1.5)
+        plt.scatter(others[3], others[4], color='blue', s=8, marker='o')
+        plt.title("R_inv, Bt/Ip, ji=0.5")
+        plt.xlabel("Bt/Ip")
+        plt.ylabel("R_inv")
+        plt.xlim(0.0016, 0.0042)
+        plt.ylim(40, 60)
+        plt.grid(True, linestyle=':', alpha=0.5)
+        plt.savefig('report/images/fig_3_4_internal.png', dpi=300)
+        plt.close()
 
-# Top-right: Jaccard Index Distribution (first event)
-set title "Jaccard Index Distribution" font ',14'
-set xlabel "Radius R (cm)"
-set ylabel "Jaccard Index J_I"
-set yrange [0:1.1]
-set key top right
-set grid
+        # Fig 3.5 (External)
+        plt.figure(figsize=(10, 6))
+        plt.plot(xp, p(xp), color='gray', lw=1.5, alpha=0.8) # Regression line
+        consistent_ext = points[points[11] == 1]
+        others_ext = points[points[11] == 0]
+        plt.errorbar(consistent_ext[3], consistent_ext[4], yerr=[consistent_ext[4]-consistent_ext[7], consistent_ext[8]-consistent_ext[4]],
+                     fmt='none', ecolor='red', elinewidth=0.8, capsize=1.5)
+        plt.scatter(consistent_ext[3], consistent_ext[4], color='red', s=8, marker='o')
+        plt.errorbar(others_ext[3], others_ext[4], yerr=[others_ext[4]-others_ext[7], others_ext[8]-others_ext[4]],
+                     fmt='none', ecolor='blue', elinewidth=0.8, capsize=1.5)
+        plt.scatter(others_ext[3], others_ext[4], color='blue', s=8, marker='o')
+        plt.title("R_inv, Bt/Ip, ji>0")
+        plt.xlabel("Bt/Ip")
+        plt.ylabel("R_inv")
+        plt.xlim(0.0016, 0.0042)
+        plt.ylim(40, 60)
+        plt.grid(True, linestyle=':', alpha=0.5)
+        plt.savefig('report/images/fig_3_5_external.png', dpi=300)
+        plt.close()
+    except Exception as e:
+        print(f"Error Fig 3.4/3.5: {e}")
 
-plot '< grep "^42145,194" report/traces/jaccard_curves.csv' using 3:4 with lines ls 3 lw 3 title 'J_I(R)', \
-     0.5 with lines ls 4 lw 2 title 'J_I = 0.5 Threshold'
+def plot_fig_3_6():
+    """Figure 3.6: Joint Corridor"""
+    try:
+        hist = pd.read_csv('report/traces/histogram_data.csv', comment='#', header=None,
+                          names=['bt_ip', 'mean', 'low', 'high', 'ext_low', 'ext_high', 'count'])
+        with open('report/traces/joint_corridor_forecast.csv', 'r') as f:
+            lines = f.readlines()
+        corridor_data = [[float(p) for p in l.split(',')] for l in lines if l[0].isdigit()]
+        corridor = pd.DataFrame(corridor_data)
+        
+        plt.figure(figsize=(10, 6))
+        # Blue shaded corridor to match doc_ref-22
+        plt.fill_between(corridor[0], corridor[2], corridor[3], color='#a29bfe', alpha=0.6, label='Admissible Region')
+        # Red interval bars for binned data (matching the internal constraints used for the corridor)
+        plt.errorbar(hist['bt_ip'], hist['mean'], yerr=[hist['mean']-hist['low'], hist['high']-hist['mean']],
+                     fmt='none', ecolor='red', elinewidth=1.2, capsize=4)
+        plt.scatter(hist['bt_ip'], hist['mean'], color='red', s=12, label='R_inv')
+        plt.title("R_inv, Bt/Ip, ji>0")
+        plt.xlabel("Bt/Ip")
+        plt.ylabel("R_inv")
+        plt.xlim(0.0018, 0.0040)
+        plt.ylim(48, 56)
+        plt.grid(True, linestyle=':', alpha=0.5)
+        plt.savefig('report/images/fig_3_6_corridor.png', dpi=300)
+        plt.close()
+    except Exception as e:
+        print(f"Error Fig 3.6: {e}")
 
-unset yrange
-
-# Bottom-left: R_inv vs B_T/I_P with Regression
-set title "Inversion Radius vs Magnetic Field Ratio" font ',14'
-set xlabel "B_T / I_P (T/kA)"
-set ylabel "Inversion Radius R_{inv} (cm)"
-set key top right
-set grid
-set autoscale
-
-# Extract regression coefficients
-slope = system("grep '^regression' report/traces/plot_data.csv | cut -d',' -f2")
-intercept = system("grep '^regression' report/traces/plot_data.csv | cut -d',' -f3")
-f(x) = real(slope) * x + real(intercept)
-
-# Plot data points and regression line
-plot '< grep "^[0-9]" report/traces/plot_data.csv' using 4:5 with points ls 1 pt 7 ps 1.2 title 'R_{inv} Point Estimate', \
-     f(x) with lines ls 4 lw 2 title sprintf("Regression: y = %.2fx + %.1f", real(slope), real(intercept))
-
-# Bottom-right: Regression Forecast with Uncertainty Bands
-set title "Forecast for Future Plasma Regimes" font ',14'
-set xlabel "B_T / I_P (T/kA)"
-set ylabel "Predicted R_{inv} (cm)"
-set key top right
-set grid
-
-plot '< grep -v "^#" report/traces/regression_data.csv | tail -100' using 1:3:4 with filledcurves ls 5 title 'Uncertainty Band', \
-     '< grep -v "^#" report/traces/regression_data.csv | tail -100' using 1:2 with lines ls 3 lw 3 title 'Central Forecast', \
-     '< grep "^[0-9]" report/traces/plot_data.csv' using 4:5 with points ls 1 pt 7 ps 1.0 title 'Observed Data'
-
-unset multiplot
-
-# Detailed Jaccard overlay plot
-set output 'report/images/jaccard_overlay.png'
-set terminal pngcairo enhanced font 'Arial,12' size 1200,800
-
-set title "Jaccard Index Curves for Multiple Sawtooth Events" font ',14'
-set xlabel "Radius R (cm)"
-set ylabel "Jaccard Index J_I"
-set yrange [0:1.1]
-set key off
-set grid
-
-# Plot curves for different events
-plot 'report/traces/jaccard_curves.csv' using 3:4:(column(1)) with lines lc palette notitle, \
-     0.5 with lines ls 4 lw 2 dt 2 notitle
-
-unset yrange
-
-# Detailed regression plot (Figure 3.4: Compatibility Plot)
-set output 'report/images/compatibility_plot.png'
-set terminal pngcairo enhanced font 'Arial,12' size 1200,800
-
-set title "Figure 3.4: Inversion Radius Compatibility Analysis (J_I >= 0.5)" font ',14'
-set xlabel "B_T / I_P (T/kA)"
-set ylabel "Inversion Radius R_{inv} (cm)"
-set key top right box opaque
-set grid
-set yrange [40:60]
-
-# Filter consistent (red) and non-consistent (blue) points
-# plot_data.csv column 10 is 'is_consistent'
-plot '< grep "^[0-9].*,1$" report/traces/plot_data.csv' using 4:5:6:7 with yerrorbars lc rgb "red" pt 7 ps 1.0 title 'Consistent R_{inv}', \
-     '< grep "^[0-9].*,0$" report/traces/plot_data.csv' using 4:5:6:7 with yerrorbars lc rgb "blue" pt 7 ps 1.0 title 'Other R_{inv}', \
-     f(x) with lines ls 4 lw 2 lc rgb "black" title "Regression Line"
-
-print "Plots generated successfully:"
-print "  - report/images/analysis_results.png (4-panel overview)"
-print "  - report/images/jaccard_overlay.png (Jaccard curves overlay)"
-print "  - report/images/compatibility_plot.png (Figure 3.4: red/blue compatibility)"
+if __name__ == "__main__":
+    plot_fig_3_2()
+    plot_fig_3_3()
+    plot_fig_3_4_3_5()
+    plot_fig_3_6()
+    print("All reference plots generated in report/images/")
 "##;
-
     write!(file, "{}", script)?;
-
-    println!("Generated gnuplot script: {}", script_path);
     Ok(())
 }

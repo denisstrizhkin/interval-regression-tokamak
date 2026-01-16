@@ -1,0 +1,9 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Введение}{3}{}%
+\contentsline {section}{\numberline {2}Теоретические основы интервальной статистики}{3}{}%
+\contentsline {subsection}{\numberline {2.1}Индекс Жаккара для профилей}{3}{}%
+\contentsline {section}{\numberline {3}Анализ данных токамака «Глобус-М2»}{3}{}%
+\contentsline {section}{\numberline {4}Результаты и их интерпретация}{4}{}%
+\contentsline {subsection}{\numberline {4.1}Анализ полученных интервальных оценок}{4}{}%
+\contentsline {subsection}{\numberline {4.2}Построение коридора совместных зависимостей}{5}{}%
+\contentsline {section}{\numberline {5}Выводы}{6}{}%

@@ -65,6 +65,53 @@ impl IntervalRegression {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct JointCorridor {
+    pub lines: Vec<(f64, f64)>, // (slope, intercept)
+}
+
+impl JointCorridor {
+    /// Predicts the envelope [y_min, y_max] at a given x point.
+    pub fn predict_envelope(&self, x: f64) -> Option<Interval> {
+        if self.lines.is_empty() {
+            return None;
+        }
+
+        let mut y_min = f64::INFINITY;
+        let mut y_max = f64::NEG_INFINITY;
+
+        for (a, b) in &self.lines {
+            let y = a * x + b;
+            y_min = y_min.min(y);
+            y_max = y_max.max(y);
+        }
+
+        Some(Interval::new(y_min, y_max))
+    }
+
+    /// Generates forecast data using the envelope of all admissible lines.
+    pub fn forecast(&self, x_min: f64, x_max: f64, num_points: usize) -> Vec<ForecastPoint> {
+        if self.lines.is_empty() {
+            return Vec::new();
+        }
+
+        let step = (x_max - x_min) / (num_points as f64 - 1.0);
+
+        (0..num_points)
+            .map(|i| {
+                let x = x_min + i as f64 * step;
+                let interval = self.predict_envelope(x).unwrap();
+                ForecastPoint {
+                    bt_ip: x,
+                    r_inv_point: interval.midpoint(),
+                    r_inv_lower: interval.lower,
+                    r_inv_upper: interval.upper,
+                }
+            })
+            .collect()
+    }
+}
+
 /// A single point in the forecast curve.
 #[derive(Debug, Clone)]
 pub struct ForecastPoint {
@@ -323,4 +370,56 @@ pub fn weighted_interval_regression(analyses: &[InversionAnalysis]) -> Option<In
         data_points: robust.data_points,
         interval_bands: robust.interval_bands,
     })
+}
+/// Implements Algorithm 3.7: Construction of the corridor of joint dependencies.
+pub fn compute_joint_corridor(data: &[(f64, Interval)]) -> JointCorridor {
+    let mut admissible_lines = Vec::new();
+
+    if data.len() < 2 {
+        return JointCorridor {
+            lines: admissible_lines,
+        };
+    }
+
+    // Step A: Generation of candidate lines passing through interval corners
+    for i in 0..data.len() {
+        for j in (i + 1)..data.len() {
+            let (xi, yi) = &data[i];
+            let (xj, yj) = &data[j];
+
+            if (xj - xi).abs() < 1e-12 {
+                continue;
+            }
+
+            let combinations = [
+                (yi.lower, yj.lower),
+                (yi.lower, yj.upper),
+                (yi.upper, yj.lower),
+                (yi.upper, yj.upper),
+            ];
+
+            for (y1, y2) in combinations {
+                let slope = (y2 - y1) / (xj - xi);
+                let intercept = y1 - slope * xi;
+
+                // Step B: Verification of intersection with all selected intervals
+                let mut is_admissible = true;
+                for (xm, ym) in data {
+                    let y_pred = slope * xm + intercept;
+                    if y_pred < ym.lower - 1e-9 || y_pred > ym.upper + 1e-9 {
+                        is_admissible = false;
+                        break;
+                    }
+                }
+
+                if is_admissible {
+                    admissible_lines.push((slope, intercept));
+                }
+            }
+        }
+    }
+
+    JointCorridor {
+        lines: admissible_lines,
+    }
 }
