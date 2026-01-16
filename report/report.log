@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024 Gentoo Linux) (preloaded format=pdflatex 2025.12.24)  16 JAN 2026 03:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024 Gentoo Linux) (preloaded format=pdflatex 2025.12.24)  16 JAN 2026 04:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**report/report.tex
-(./report/report.tex
+**report.tex
+(./report.tex
 LaTeX2e <2024-11-01>
 L3 programming layer <2024-11-02>
 (/usr/share/texmf-dist/tex/latex/base/article.cls
@@ -448,8 +448,7 @@ Package: titlesec 2023/10/27 v2.16 Sectioning titles
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count290
 \l__pdf_internal_box=\box57
-)
-(report/report.aux)
+) (./report.aux)
 \openout1 = `report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
@@ -469,7 +468,7 @@ LaTeX Font Info:    ... okay on input line 20.
 LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 20.
 LaTeX Font Info:    ... okay on input line 20.
 LaTeX Info: Redefining \th on input line 20.
- (/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+(/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count291
 \scratchdimen=\dimen175
@@ -589,7 +588,7 @@ Package pdftex.def Info: images/fig_3_4_internal.png  used on input line 102.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 
 
-[2 <report/images/fig_3_2_profiles.png> <report/images/fig_3_3_jaccard.png>]
+[2 <./images/fig_3_2_profiles.png> <./images/fig_3_3_jaccard.png>]
 <images/fig_3_5_external.png, id=25, 722.7pt x 433.62pt>
 File: images/fig_3_5_external.png Graphic file (type png)
 <use images/fig_3_5_external.png>
@@ -609,8 +608,8 @@ Underfull \hbox (badness 4765) in paragraph at lines 118--119
 
 
 
-[3{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <report/ima
-ges/fig_3_4_internal.png> <report/images/fig_3_5_external.png>]
+[3{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <./images/f
+ig_3_4_internal.png> <./images/fig_3_5_external.png>]
 Underfull \hbox (badness 1210) in paragraph at lines 128--129
 \T2A/cmr/m/n/12 модел€ми, св€зывающими размер области перемешивани€ с конфигура
 цией
@@ -635,7 +634,7 @@ Underfull \hbox (badness 2903) in paragraph at lines 145--146
 
 
 
-[4 <report/images/fig_3_7_info_set.png>]
+[4 <./images/fig_3_7_info_set.png>]
 Underfull \hbox (badness 10000) in paragraph at lines 159--160
 \T2A/cmr/m/n/12 модель, минимизирующа€ вли€ние локальных экстремумов отдельных
  []
@@ -665,22 +664,22 @@ Underfull \hbox (badness 1112) in paragraph at lines 171--172
 
 
 
-[5 <report/images/fig_3_6_corridor.png>]
+[5 <./images/fig_3_6_corridor.png>]
 
-[6] (report/report.aux)
+[6] (./report.aux)
  ***********
 LaTeX2e <2024-11-01>
 L3 programming layer <2024-11-02>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 6946 strings out of 474682
- 111345 string characters out of 5760770
+ 6945 strings out of 474682
+ 111286 string characters out of 5760770
  505947 words of memory out of 5000000
  29754 multiletter control sequences out of 15000+600000
  568772 words of font info for 62 fonts, out of 8000000 for 9000
  497 hyphenation exceptions out of 8191
- 57i,8n,65p,677b,360s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 57i,8n,65p,670b,360s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/font
 s/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/
@@ -690,7 +689,7 @@ are/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/
 fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf-dist/fonts/type1/pub
 lic/cm-super/sfbx1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sf
 rm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
-Output written on report/report.pdf (7 pages, 1131919 bytes).
+Output written on report.pdf (7 pages, 1121724 bytes).
 PDF statistics:
  101 PDF objects out of 1000 (max. 8388607)
  56 compressed objects within 1 object stream
