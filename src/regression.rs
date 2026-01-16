@@ -410,7 +410,7 @@ pub fn weighted_interval_regression(analyses: &[InversionAnalysis]) -> Option<In
         interval_bands: robust.interval_bands,
     })
 }
-/// Implements Algorithm 3.7: Construction of the corridor of joint dependencies.
+/// Construction of the corridor of joint dependencies using the method of envelopes.
 pub fn compute_joint_corridor(data: &[(f64, Interval)]) -> JointCorridor {
     let mut admissible_lines = Vec::new();
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024 Gentoo Linux) (preloaded format=pdflatex 2025.12.24)  16 JAN 2026 02:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024 Gentoo Linux) (preloaded format=pdflatex 2025.12.24)  16 JAN 2026 02:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -23,31 +23,8 @@ File: size12.clo 2024/06/29 v1.4n Standard LaTeX file (size option)
 \belowcaptionskip=\skip50
 \bibindent=\dimen141
 )
-(/usr/share/texmf-dist/tex/latex/base/inputenc.sty
-Package: inputenc 2024/02/08 v1.3d Input encoding file
-\inpenc@prehook=\toks17
-\inpenc@posthook=\toks18
-)
-(/usr/share/texmf-dist/tex/generic/babel/babel.sty
-Package: babel 2024/11/08 v24.13 The multilingual framework for pdfLaTeX, LuaLa
-TeX and XeLaTeX
-\babel@savecnt=\count270
-\U@D=\dimen142
-\l@unhyphenated=\language20
-
-(/usr/share/texmf-dist/tex/generic/babel/txtbabel.def)
-\bbl@readstream=\read2
-\bbl@dirlevel=\count271
-
-(/usr/share/texmf-dist/tex/generic/babel-russian/russianb.ldf
-File: russianb.ldf 2021/01/10 1.3m Russian support for the Babel system
-Language: russian 2020/09/09 1.3k Russian support for the Babel system
-
-
-Package babel Warning: No Cyrillic font encoding has been loaded so far.
-(babel)                A font encoding should be declared before babel.
-(babel)                Default `T2A' encoding will be loaded  on input line 78.
-
+(/usr/share/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
 
 (/usr/share/texmf-dist/tex/latex/cyrillic/t2aenc.def
 File: t2aenc.def 2023/11/07 v1.0k Cyrillic encoding definition file
@@ -255,6 +232,31 @@ File: t2aenc.dfu 2022/06/07 v1.3c UTF-8 support
    defining Unicode char U+FB05 (decimal 64261)
    defining Unicode char U+FB06 (decimal 64262)
 ))
+LaTeX Font Info:    Trying to load font information for T2A+cmr on input line 1
+16.
+
+(/usr/share/texmf-dist/tex/latex/cyrillic/t2acmr.fd
+File: t2acmr.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
+))
+(/usr/share/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+\inpenc@prehook=\toks17
+\inpenc@posthook=\toks18
+)
+(/usr/share/texmf-dist/tex/generic/babel/babel.sty
+Package: babel 2024/11/08 v24.13 The multilingual framework for pdfLaTeX, LuaLa
+TeX and XeLaTeX
+\babel@savecnt=\count270
+\U@D=\dimen142
+\l@unhyphenated=\language20
+
+(/usr/share/texmf-dist/tex/generic/babel/txtbabel.def)
+\bbl@readstream=\read2
+\bbl@dirlevel=\count271
+
+(/usr/share/texmf-dist/tex/generic/babel-russian/russianb.ldf
+File: russianb.ldf 2021/01/10 1.3m Russian support for the Babel system
+Language: russian 2020/09/09 1.3k Russian support for the Babel system
 Package babel Info: Making " an active character on input line 124.
 Package babel Info: Default for \cyrdash is provided on input line 163.
 )
@@ -275,14 +277,6 @@ Package babel Info: Importing font and identification data for english
 Package babel Info: Importing font and identification data for russian
 (babel)             from babel-ru.ini. Reported on input line 11.
 )
-(/usr/share/texmf-dist/tex/latex/base/fontenc.sty
-Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
-LaTeX Font Info:    Trying to load font information for T2A+cmr on input line 1
-16.
-
-(/usr/share/texmf-dist/tex/latex/cyrillic/t2acmr.fd
-File: t2acmr.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
-))
 (/usr/share/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2024/11/05 v2.17t AMS math features
 \@mathmargin=\skip51
@@ -458,23 +452,23 @@ File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 (report/report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Info: Redefining \th on input line 18.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Info: Redefining \th on input line 20.
  (/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count291
@@ -539,164 +533,120 @@ Package caption Info: End \AtBeginDocument code.
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fonts
 /enc/dvips/cm-super/cm-super-t2a.enc}]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 45.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 47.
 
 
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 45.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 47.
 
 
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Overfull \hbox (11.06973pt too wide) in paragraph at lines 45--46
+Underfull \hbox (badness 1558) in paragraph at lines 47--48
 []\T2A/cmr/m/n/12 Радиус инверсии $\OML/cmm/m/it/12 R[]$ \T2A/cmr/m/n/12 являет
-ся критическим параметром при анализе МГД-активности
- []
-
-
-Overfull \hbox (19.06264pt too wide) in paragraph at lines 45--46
-\T2A/cmr/m/n/12 в плазме токамака Глобус-М2. Традиционные методы точечных оцено
-к часто не учитывают
- []
-
-
-Overfull \hbox (26.73706pt too wide) in paragraph at lines 62--63
-[]\T2A/cmr/m/n/12 На рис. 1[] представлены типичные профили температуры до и по
-сле сброса пилообразного
+ся критическим параметром при анализе МГД-
  []
 
 <images/fig_3_2_profiles.png, id=8, 722.7pt x 433.62pt>
 File: images/fig_3_2_profiles.png Graphic file (type png)
 <use images/fig_3_2_profiles.png>
-Package pdftex.def Info: images/fig_3_2_profiles.png  used on input line 66.
+Package pdftex.def Info: images/fig_3_2_profiles.png  used on input line 68.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 <images/fig_3_3_jaccard.png, id=10, 722.7pt x 433.62pt>
 File: images/fig_3_3_jaccard.png Graphic file (type png)
 <use images/fig_3_3_jaccard.png>
-Package pdftex.def Info: images/fig_3_3_jaccard.png  used on input line 75.
+Package pdftex.def Info: images/fig_3_3_jaccard.png  used on input line 77.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 
 
 [1 <report/images/fig_3_2_profiles.png>]
-Overfull \hbox (28.87614pt too wide) in paragraph at lines 82--84
+Underfull \hbox (badness 10000) in paragraph at lines 84--86
 []\T2A/cmr/m/n/12 Для каждого экспериментального значения параметра $\OML/cmm/m
-/it/12 B[]=I[]$ \T2A/cmr/m/n/12 определен соответствующий
+/it/12 B[]=I[]$ \T2A/cmr/m/n/12 определен
  []
 
 <images/fig_3_4_internal.png, id=20, 722.7pt x 433.62pt>
 File: images/fig_3_4_internal.png Graphic file (type png)
 <use images/fig_3_4_internal.png>
-Package pdftex.def Info: images/fig_3_4_internal.png  used on input line 87.
+Package pdftex.def Info: images/fig_3_4_internal.png  used on input line 89.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 <images/fig_3_5_external.png, id=21, 722.7pt x 433.62pt>
 File: images/fig_3_5_external.png Graphic file (type png)
 <use images/fig_3_5_external.png>
-Package pdftex.def Info: images/fig_3_5_external.png  used on input line 94.
+Package pdftex.def Info: images/fig_3_5_external.png  used on input line 96.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 
 
 [2 <report/images/fig_3_3_jaccard.png> <report/images/fig_3_4_internal.png>]
-Overfull \hbox (8.43504pt too wide) in paragraph at lines 102--103
-[]\T2A/cmr/bx/n/12 Ширина интервалов: \T2A/cmr/m/n/12 Внутренняя оценка дает су
-щественно более узкий интервал
- []
-
-
-Overfull \hbox (23.19604pt too wide) in paragraph at lines 103--104
+Underfull \hbox (badness 1881) in paragraph at lines 105--106
 []\T2A/cmr/bx/n/12 Накрывающие свойства: \T2A/cmr/m/n/12 Внешняя оценка являетс
-я накрывающей, что увеличивает
+я накрывающей, что
  []
 
 
-Overfull \hbox (0.79828pt too wide) in paragraph at lines 103--104
-\T2A/cmr/m/n/12 вероятность попадания в нее истинного значения параметра. При э
-том внутренняя
+Underfull \hbox (badness 4765) in paragraph at lines 105--106
+\T2A/cmr/m/n/12 гарантирует попадание в нее истинного значения параметра с высо
+кой
  []
 
 
-Overfull \hbox (18.53297pt too wide) in paragraph at lines 113--114
-[]\T2A/cmr/m/n/12 Тенденция к уменьшению $\OML/cmm/m/it/12 R[]$ \T2A/cmr/m/n/12
- с ростом $\OML/cmm/m/it/12 B[]=I[]$ \T2A/cmr/m/n/12 согласуется с теоретически
-ми моделями,
+Underfull \hbox (badness 1210) in paragraph at lines 115--116
+\T2A/cmr/m/n/12 моделями, связывающими размер области перемешивания с конфигура
+цией
  []
 
 
-Overfull \hbox (0.91113pt too wide) in paragraph at lines 113--114
-\T2A/cmr/m/n/12 связывающими размер области перемешивания с конфигурацией магни
-тного поля. 
- []
-
-
-Overfull \hbox (11.35313pt too wide) in paragraph at lines 114--115
-\T2A/cmr/m/n/12 точностью оценки (внутренний метод) и достоверностью покрытия (
-внешний метод). 
- []
-
-
-Overfull \hbox (33.14366pt too wide) in paragraph at lines 118--119
+Underfull \hbox (badness 1577) in paragraph at lines 120--121
 \T2A/cmr/m/n/12 система ограничений линейна, данное множество представляет собо
-й выпуклый многогранник
- []
-
-
-Overfull \hbox (26.99814pt too wide) in paragraph at lines 120--121
-[]\T2A/cmr/m/n/12 На рис. 5[] представлено внешнее информационное множество, по
-строенное по результатам
- []
-
-
-Overfull \hbox (34.89066pt too wide) in paragraph at lines 120--121
-\T2A/cmr/m/n/12 анализа внешних интервальных оценок инверсии. Любой точке этого
- множества соответствует
+й выпуклый
  []
 
 
 
 [3{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <report/ima
 ges/fig_3_5_external.png>]
-<images/fig_3_7_info_set.png, id=35, 722.7pt x 433.62pt>
+<images/fig_3_7_info_set.png, id=34, 722.7pt x 433.62pt>
 File: images/fig_3_7_info_set.png Graphic file (type png)
 <use images/fig_3_7_info_set.png>
-Package pdftex.def Info: images/fig_3_7_info_set.png  used on input line 124.
+Package pdftex.def Info: images/fig_3_7_info_set.png  used on input line 126.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 
-Overfull \hbox (20.11269pt too wide) in paragraph at lines 134--135
-[]\T2A/cmr/bx/n/12 Формирование коридора: \T2A/cmr/m/n/12 Границы определяются 
-как огибающие всех допустимых
+Underfull \hbox (badness 2903) in paragraph at lines 132--133
+\T2A/cmr/m/n/12 Данный подход позволяет построить огибающую всех линейных завис
+имостей,
  []
 
-
-Overfull \hbox (40.91524pt too wide) in paragraph at lines 140--141
-[]\T2A/cmr/bx/n/12 Центр наибольшей диагонали \T2A/cmr/m/n/12 (зеленая линия) -
--- соответствует центру прямоугольной
- []
-
-<images/fig_3_6_corridor.png, id=36, 722.7pt x 433.62pt>
-File: images/fig_3_6_corridor.png Graphic file (type png)
-<use images/fig_3_6_corridor.png>
-Package pdftex.def Info: images/fig_3_6_corridor.png  used on input line 145.
-(pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 
 
 [4 <report/images/fig_3_7_info_set.png>]
-Overfull \hbox (65.08926pt too wide) in paragraph at lines 151--152
+Underfull \hbox (badness 10000) in paragraph at lines 146--147
+\T2A/cmr/m/n/12 модель, минимизирующая влияние локальных экстремумов отдельных
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 147--148
+\T2A/cmr/m/n/12 прямоугольной оболочки информационного множества, представляющи
+й
+ []
+
+<images/fig_3_6_corridor.png, id=41, 722.7pt x 433.62pt>
+File: images/fig_3_6_corridor.png Graphic file (type png)
+<use images/fig_3_6_corridor.png>
+Package pdftex.def Info: images/fig_3_6_corridor.png  used on input line 152.
+(pdftex.def)             Requested size: 399.05278pt x 239.43127pt.
+
+Underfull \hbox (badness 2856) in paragraph at lines 158--159
 []\T2A/cmr/m/n/12 Разработанный программный комплекс на языке Rust позволяет пр
-оводить автоматизированный
+оводить
  []
 
 
-Overfull \hbox (22.48463pt too wide) in paragraph at lines 151--152
-\T2A/cmr/m/n/12 интервальный анализ данных токамака Глобус-М2. Метод построения
- коридора совместных
- []
-
-
-Overfull \hbox (12.32088pt too wide) in paragraph at lines 151--152
-\T2A/cmr/m/n/12 зависимостей (Алгоритм 3.7) обеспечивает высокую надежность про
-гнозирования радиуса
+Underfull \hbox (badness 1112) in paragraph at lines 158--159
+\T2A/cmr/m/n/12 автоматизированный интервальный анализ данных токамака Глобус-М
+2. Метод
  []
 
 
@@ -708,13 +658,13 @@ L3 programming layer <2024-11-02>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 6746 strings out of 474682
- 105736 string characters out of 5760770
- 505608 words of memory out of 5000000
- 29555 multiletter control sequences out of 15000+600000
- 567902 words of font info for 61 fonts, out of 8000000 for 9000
+ 6946 strings out of 474682
+ 111345 string characters out of 5760770
+ 505947 words of memory out of 5000000
+ 29754 multiletter control sequences out of 15000+600000
+ 568772 words of font info for 62 fonts, out of 8000000 for 9000
  497 hyphenation exceptions out of 8191
- 57i,8n,65p,677b,367s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 57i,8n,65p,677b,360s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/font
 s/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/
@@ -723,11 +673,11 @@ amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
 are/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/
 fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf-dist/fonts/type1/pub
 lic/cm-super/sfbx1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sf
-rm1200.pfb>
-Output written on report/report.pdf (6 pages, 1059465 bytes).
+rm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
+Output written on report/report.pdf (6 pages, 1082821 bytes).
 PDF statistics:
- 91 PDF objects out of 1000 (max. 8388607)
- 49 compressed objects within 1 object stream
+ 96 PDF objects out of 1000 (max. 8388607)
+ 52 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
