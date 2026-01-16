@@ -89,6 +89,45 @@ impl JointCorridor {
         Some(Interval::new(y_min, y_max))
     }
 
+    /// Computes the 'Mass Center' regression line (mean parameters).
+    pub fn mass_center_line(&self) -> Option<(f64, f64)> {
+        if self.lines.is_empty() {
+            return None;
+        }
+        let n = self.lines.len() as f64;
+        let sum_a: f64 = self.lines.iter().map(|(a, _)| a).sum();
+        let sum_b: f64 = self.lines.iter().map(|(_, b)| b).sum();
+        Some((sum_a / n, sum_b / n))
+    }
+
+    /// Computes the 'Diagonal Center' regression line (center of parameter bounding box).
+    pub fn diagonal_center_line(&self) -> Option<(f64, f64)> {
+        if self.lines.is_empty() {
+            return None;
+        }
+        let min_a = self
+            .lines
+            .iter()
+            .map(|(a, _)| *a)
+            .fold(f64::INFINITY, f64::min);
+        let max_a = self
+            .lines
+            .iter()
+            .map(|(a, _)| *a)
+            .fold(f64::NEG_INFINITY, f64::max);
+        let min_b = self
+            .lines
+            .iter()
+            .map(|(_, b)| *b)
+            .fold(f64::INFINITY, f64::min);
+        let max_b = self
+            .lines
+            .iter()
+            .map(|(_, b)| *b)
+            .fold(f64::NEG_INFINITY, f64::max);
+        Some(((min_a + max_a) / 2.0, (min_b + max_b) / 2.0))
+    }
+
     /// Generates forecast data using the envelope of all admissible lines.
     pub fn forecast(&self, x_min: f64, x_max: f64, num_points: usize) -> Vec<ForecastPoint> {
         if self.lines.is_empty() {

@@ -130,36 +130,94 @@ def plot_fig_3_4_3_5():
         print(f"Error Fig 3.4/3.5: {e}")
 
 def plot_fig_3_6():
-    """Figure 3.6: Joint Corridor"""
+    """Figure 3.9 style: Joint Corridor with multiple regression choices"""
     try:
         hist = pd.read_csv('report/traces/histogram_data.csv', comment='#', header=None,
                           names=['bt_ip', 'mean', 'low', 'high', 'ext_low', 'ext_high', 'count'])
+        
+        mass_slope, mass_int = 0, 0
+        diag_slope, diag_int = 0, 0
+        
         with open('report/traces/joint_corridor_forecast.csv', 'r') as f:
             lines = f.readlines()
-        corridor_data = [[float(p) for p in l.split(',')] for l in lines if l[0].isdigit()]
+            for line in lines:
+                if "Mass Center Line" in line:
+                    parts = line.split(',')
+                    mass_slope = float(parts[0].split('=')[1])
+                    mass_int = float(parts[1].split('=')[1])
+                elif "Diagonal Center Line" in line:
+                    parts = line.split(',')
+                    diag_slope = float(parts[0].split('=')[1])
+                    diag_int = float(parts[1].split('=')[1])
+
+        corridor_data = [[float(p) for p in l.split(',')] for l in lines if l and l[0].isdigit()]
         corridor = pd.DataFrame(corridor_data)
         
         plt.figure(figsize=(10, 6))
-        # Blue shaded corridor to match doc_ref-22
-        plt.fill_between(corridor[0], corridor[2], corridor[3], color='#a29bfe', alpha=0.6, label='Admissible Region')
-        # Red interval bars for binned data (matching the internal constraints used for the corridor)
-        plt.errorbar(hist['bt_ip'], hist['mean'], yerr=[hist['mean']-hist['low'], hist['high']-hist['mean']],
-                     fmt='none', ecolor='red', elinewidth=1.2, capsize=4)
-        plt.scatter(hist['bt_ip'], hist['mean'], color='red', s=12, label='R_inv')
+        
+        # 1. Admissible Region (blue corridor)
+        plt.fill_between(corridor[0], corridor[2], corridor[3], color='#a29bfe', alpha=0.6, label='corridor')
+        
+        # 2. Experimental data points (Blue circles with error bars, as per doc_ref)
+        # Using ext_low/ext_high for blue dots to show the broad uncertainty
+        plt.errorbar(hist['bt_ip'], hist['mean'], yerr=[hist['mean']-hist['ext_low'], hist['ext_high']-hist['mean']],
+                     fmt='none', ecolor='blue', elinewidth=0.8, capsize=2, alpha=0.6)
+        plt.scatter(hist['bt_ip'], hist['mean'], color='blue', s=8, label='R_inv', marker='o')
+
+        # 3. Forecast lines
+        x_full = np.linspace(0.0016, 0.010, 200)
+        plt.plot(x_full, mass_slope * x_full + mass_int, color='black', lw=1.5, label='mass center regression')
+        plt.plot(x_full, diag_slope * x_full + diag_int, color='#27ae60', lw=1.2, label='diagonal center regression')
+
+        # 4. Prediction points (Red markers at the end of the range)
+        forecast_pts = corridor[corridor[0] > 0.0035].iloc[::40] # Sparse points for visibility
+        plt.errorbar(forecast_pts[0], forecast_pts[1], yerr=[forecast_pts[1]-forecast_pts[2], forecast_pts[3]-forecast_pts[1]],
+                     fmt='none', ecolor='red', elinewidth=0.8, capsize=2)
+        plt.scatter(forecast_pts[0], forecast_pts[1], color='red', s=10, marker='x', label='prediction ji>0')
+
         plt.title("R_inv, Bt/Ip, ji>0")
         plt.xlabel("Bt/Ip")
         plt.ylabel("R_inv")
-        plt.xlim(0.0018, 0.0040)
-        plt.ylim(48, 56)
+        plt.xlim(0.0015, 0.0105)
+        plt.ylim(40, 60)
+        plt.legend(frameon=True, loc='upper right')
         plt.grid(True, linestyle=':', alpha=0.5)
         plt.savefig('report/images/fig_3_6_corridor.png', dpi=300)
         plt.close()
     except Exception as e:
-        print(f"Error Fig 3.6: {e}")
+        print(f"Error Fig 3.6/3.9: {e}")
+
+def plot_fig_3_7_informational_set():
+    """Figure 3.8 style: Informational Set in parameter space (a, b)"""
+    try:
+        from scipy.spatial import ConvexHull
+        df = pd.read_csv('report/traces/informational_set.csv', comment='#', header=None, names=['a', 'b'])
+        
+        plt.figure(figsize=(10, 6))
+        points = df[['a', 'b']].values
+        
+        if len(points) >= 3:
+            hull = ConvexHull(points)
+            # Shade the informational set
+            plt.fill(points[hull.vertices, 0], points[hull.vertices, 1], color='#add8e6', alpha=0.5, edgecolor='#4682b4', lw=1.5)
+            # Plot the 'corners' (red dots as in doc_ref-21)
+            plt.scatter(points[:, 0], points[:, 1], color='red', s=10, zorder=5)
+        else:
+            plt.scatter(df['a'], df['b'], color='red', s=10)
+
+        plt.title("Внешнее информационное множество для R_inv")
+        plt.xlabel("b1 (slope)")
+        plt.ylabel("b2 (intercept)")
+        plt.grid(True, linestyle=':', alpha=0.5)
+        plt.savefig('report/images/fig_3_7_info_set.png', dpi=300)
+        plt.close()
+    except Exception as e:
+        print(f"Error Fig 3.7: {e}")
 
 if __name__ == "__main__":
     plot_fig_3_2()
     plot_fig_3_3()
     plot_fig_3_4_3_5()
     plot_fig_3_6()
+    plot_fig_3_7_informational_set()
     print("All reference plots generated in report/images/")

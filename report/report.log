@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024 Gentoo Linux) (preloaded format=pdflatex 2025.12.24)  16 JAN 2026 01:57
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024 Gentoo Linux) (preloaded format=pdflatex 2025.12.24)  16 JAN 2026 02:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -599,62 +599,135 @@ Package pdftex.def Info: images/fig_3_5_external.png  used on input line 94.
 
 
 [2 <report/images/fig_3_3_jaccard.png> <report/images/fig_3_4_internal.png>]
-Overfull \hbox (20.11269pt too wide) in paragraph at lines 104--105
+Overfull \hbox (8.43504pt too wide) in paragraph at lines 102--103
+[]\T2A/cmr/bx/n/12 Ширина интервалов: \T2A/cmr/m/n/12 Внутренняя оценка дает су
+щественно более узкий интервал
+ []
+
+
+Overfull \hbox (23.19604pt too wide) in paragraph at lines 103--104
+[]\T2A/cmr/bx/n/12 Накрывающие свойства: \T2A/cmr/m/n/12 Внешняя оценка являетс
+я накрывающей, что увеличивает
+ []
+
+
+Overfull \hbox (0.79828pt too wide) in paragraph at lines 103--104
+\T2A/cmr/m/n/12 вероятность попадания в нее истинного значения параметра. При э
+том внутренняя
+ []
+
+
+Overfull \hbox (18.53297pt too wide) in paragraph at lines 113--114
+[]\T2A/cmr/m/n/12 Тенденция к уменьшению $\OML/cmm/m/it/12 R[]$ \T2A/cmr/m/n/12
+ с ростом $\OML/cmm/m/it/12 B[]=I[]$ \T2A/cmr/m/n/12 согласуется с теоретически
+ми моделями,
+ []
+
+
+Overfull \hbox (0.91113pt too wide) in paragraph at lines 113--114
+\T2A/cmr/m/n/12 связывающими размер области перемешивания с конфигурацией магни
+тного поля. 
+ []
+
+
+Overfull \hbox (11.35313pt too wide) in paragraph at lines 114--115
+\T2A/cmr/m/n/12 точностью оценки (внутренний метод) и достоверностью покрытия (
+внешний метод). 
+ []
+
+
+Overfull \hbox (33.14366pt too wide) in paragraph at lines 118--119
+\T2A/cmr/m/n/12 система ограничений линейна, данное множество представляет собо
+й выпуклый многогранник
+ []
+
+
+Overfull \hbox (26.99814pt too wide) in paragraph at lines 120--121
+[]\T2A/cmr/m/n/12 На рис. 5[] представлено внешнее информационное множество, по
+строенное по результатам
+ []
+
+
+Overfull \hbox (34.89066pt too wide) in paragraph at lines 120--121
+\T2A/cmr/m/n/12 анализа внешних интервальных оценок инверсии. Любой точке этого
+ множества соответствует
+ []
+
+
+
+[3{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <report/ima
+ges/fig_3_5_external.png>]
+<images/fig_3_7_info_set.png, id=35, 722.7pt x 433.62pt>
+File: images/fig_3_7_info_set.png Graphic file (type png)
+<use images/fig_3_7_info_set.png>
+Package pdftex.def Info: images/fig_3_7_info_set.png  used on input line 124.
+(pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
+
+Overfull \hbox (20.11269pt too wide) in paragraph at lines 134--135
 []\T2A/cmr/bx/n/12 Формирование коридора: \T2A/cmr/m/n/12 Границы определяются 
 как огибающие всех допустимых
  []
 
-<images/fig_3_6_corridor.png, id=27, 722.7pt x 433.62pt>
+
+Overfull \hbox (40.91524pt too wide) in paragraph at lines 140--141
+[]\T2A/cmr/bx/n/12 Центр наибольшей диагонали \T2A/cmr/m/n/12 (зеленая линия) -
+-- соответствует центру прямоугольной
+ []
+
+<images/fig_3_6_corridor.png, id=36, 722.7pt x 433.62pt>
 File: images/fig_3_6_corridor.png Graphic file (type png)
 <use images/fig_3_6_corridor.png>
-Package pdftex.def Info: images/fig_3_6_corridor.png  used on input line 111.
+Package pdftex.def Info: images/fig_3_6_corridor.png  used on input line 145.
 (pdftex.def)             Requested size: 375.57782pt x 225.34474pt.
 
-Overfull \hbox (65.08926pt too wide) in paragraph at lines 117--118
+
+[4 <report/images/fig_3_7_info_set.png>]
+Overfull \hbox (65.08926pt too wide) in paragraph at lines 151--152
 []\T2A/cmr/m/n/12 Разработанный программный комплекс на языке Rust позволяет пр
 оводить автоматизированный
  []
 
 
-Overfull \hbox (22.48463pt too wide) in paragraph at lines 117--118
+Overfull \hbox (22.48463pt too wide) in paragraph at lines 151--152
 \T2A/cmr/m/n/12 интервальный анализ данных токамака Глобус-М2. Метод построения
  коридора совместных
  []
 
 
-Overfull \hbox (12.32088pt too wide) in paragraph at lines 117--118
+Overfull \hbox (12.32088pt too wide) in paragraph at lines 151--152
 \T2A/cmr/m/n/12 зависимостей (Алгоритм 3.7) обеспечивает высокую надежность про
 гнозирования радиуса
  []
 
 
 
-[3 <report/images/fig_3_5_external.png> <report/images/fig_3_6_corridor.png>]
-
-[4] (report/report.aux)
+[5 <report/images/fig_3_6_corridor.png>] (report/report.aux)
  ***********
 LaTeX2e <2024-11-01>
 L3 programming layer <2024-11-02>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 6732 strings out of 474682
- 105375 string characters out of 5760770
- 504518 words of memory out of 5000000
- 29543 multiletter control sequences out of 15000+600000
- 567565 words of font info for 60 fonts, out of 8000000 for 9000
+ 6746 strings out of 474682
+ 105736 string characters out of 5760770
+ 505608 words of memory out of 5000000
+ 29555 multiletter control sequences out of 15000+600000
+ 567902 words of font info for 61 fonts, out of 8000000 for 9000
  497 hyphenation exceptions out of 8191
  57i,8n,65p,677b,367s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/font
-s/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1
-200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/s
-hare/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on report/report.pdf (5 pages, 792136 bytes).
+texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/font
+s/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
+8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sh
+are/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/
+fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf-dist/fonts/type1/pub
+lic/cm-super/sfbx1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sf
+rm1200.pfb>
+Output written on report/report.pdf (6 pages, 1059465 bytes).
 PDF statistics:
- 67 PDF objects out of 1000 (max. 8388607)
- 35 compressed objects within 1 object stream
+ 91 PDF objects out of 1000 (max. 8388607)
+ 49 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

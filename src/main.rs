@@ -221,7 +221,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         Some(&joint_corridor),
         &output_dir,
     )?;
-    output::generate_python_script(&output_dir)?;
     println!();
 
     // Final summary
